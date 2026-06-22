@@ -4,7 +4,7 @@ const features = [
 "Accounts",
 "Goals",
 "Monthly Reports",
-"AI Insights",
+"Wally AI",
 "Recommendations"
 
 ];
