@@ -11,3 +11,15 @@
 
   --text: #F2C4CE;
 }
+
+body {
+  font-family: var(--font-body), sans-serif;
+  background-color: #0D0509;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: #E8D7DE;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+}
