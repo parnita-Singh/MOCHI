@@ -4,7 +4,7 @@ import Hero from "../Componets/Hero";
 export default function Home() {
   return (
     <main>
-      <Navbar />
+       <Navbar minimal />
       <Hero />
     </main>
   );
