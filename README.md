@@ -90,7 +90,7 @@ MOCHI/
 | Name | GitHub |
 |---|---|
 | Parnita Singh | [@PARNITA-SINGH](https://github.com/PARNITA-SINGH) |
-| Prachi Mann | ([@prachimann](http://www.github.com/prachimaan)) |
+| Prachi Mann | [@prachimann](http://www.github.com/prachimaan) |
 
 ---
 
