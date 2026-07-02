@@ -14,7 +14,7 @@ Built as part of the **AWS Student Builder Cohort 2026** (AI + Cloud Track, Team
 - Track expenses across categories
 - View a running total of spending
 - AI-powered spending insights *(in progress)*
-- Clean, kawaii-inspired interface built for Gen Z
+- Clean interface 
 
 ---
 
