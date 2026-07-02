@@ -1,6 +1,16 @@
-import Image from "next/image";
-
+"use client";
+import {PieChart,Pie,Cell} from "recharts";
 export default function Hero() {
+  const chart =[
+              { label: "Rent", amount: "₹18k", pct: 100, color: "#A9B7C6" },
+              { label: "Groceries", amount: "₹8.4k", pct: 17.65, color: "#A8B58A" },
+              { label: "Investments", amount: "₹7k", pct: 14.71, color: "#B46A72" },
+              { label: "Electricity Bill", amount: "₹2.5k", pct: 5.25, color: "#FFF7E6" },
+              { label: "Water Bill", amount: "₹1.0k", pct: 2.31, color: "#F7C8D3" },
+              { label: "Transportation", amount: "₹2.1k", pct: 4.41, color: "#A8B58A" },
+              { label: "Shopping", amount: "₹8.0k", pct: 17.86, color: "#A9B7C6" },
+              { label: "Emergency Saving", amount: "₹5k", pct: 10.50, color: "#2D3A47" },
+      ];
   return (
     <main className="bg-black text-white">
 
@@ -27,8 +37,10 @@ export default function Hero() {
         </p>
 
         <div className="flex flex-col gap-24">
+        </div>
 
           {/* ── TRACKING FINANCE ── */}
+      <div>
           <div className="flex flex-col items-center gap-8">
             <div
               className="group w-full rounded-3xl p-[2px] transition-all duration-500"
@@ -52,15 +64,155 @@ export default function Hero() {
                   zIndex: 0,
                 }}
               />
-              <div className="relative z-10 w-full rounded-3xl overflow-hidden" style={{ aspectRatio: "16/7" }}>
-                <img
-                  src="/photos/Tracking finace.png"
-                  alt="Tracking Finance"
-                  className="w-full h-full object-cover object-top"
-                />
+              <div className="relative z-10 w-full rounded-3xl">
+              <div>
+                {/*Header*/}
+              <div>
+              <div className="inline-block rounded-full bg-[#1A1A1A] px-3 py-1" style={{ marginLeft: "1rem", marginTop: "1rem" }}>
+                <p style={{ color: "#AEC6CF" }}><strong>JUNE 2026</strong></p>
               </div>
-            </div>
-            <div className="max-w-2xl text-center">
+
+                  <h2 className="mt-3 px-4">
+                    Finance overview • tracked automatically
+                  </h2>
+              </div>
+              {/* Two panels side by side */}
+            <div className="flex gap-6">
+              {/*VISUALIZATION PANEL*/}
+              <div className="flex-1 bg-[#111] rounded-3xl p-5 mt-2 border border-transparent ml-4
+               hover:border-gray-400 hover:shadow-lg transition-all duration-300">
+                  <div className="text-mxl text-gray-400 tracking-widest mb-2 px-4">TOTAL SPENT</div>
+                   <p className="text-2xl font-bold text-white
+                    ml-4">₹47,600</p>
+                    <p className="text-sm text-yellow-200 mb-4
+                    ml-4">₹3,200 vs May, within budget</p>
+              {/* Progress bars */}
+           {[
+              { label: "Rent", amount: "₹18k", pct: 100, color: "#A9B7C6" },
+              { label: "Groceries", amount: "₹8.4k", pct: 17.65, color: "#A8B58A" },
+              { label: "Investments", amount: "₹7k", pct: 14.71, color: "#B46A72" },
+              { label: "Electricity Bill", amount: "₹2.5k", pct: 5.25, color: "#FFF7E6" },
+              { label: "Water Bill", amount: "₹1.0k", pct: 2.31, color: "#F7C8D3" },
+              { label: "Transportation", amount: "₹2.1k", pct: 4.41, color: "#A8B58A" },
+              { label: "Shopping", amount: "₹8.0k", pct: 17.86, color: "#A9B7C6" },
+              { label: "Emergency Saving", amount: "₹5k", pct: 10.50, color: "#2D3A47" },
+               ].map((bar, i) => (
+              <div key={i} className="flex items-center gap-3 mb-3 ">
+                <p className="text-xs text-gray-300 w-20 shrink-0">{bar.label}</p>
+              <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+           <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${bar.pct}%`, backgroundColor: bar.color }}
+           />
+           </div>
+             <p className="text-xs text-gray-400 w-10 text-right shrink-0">{bar.amount}</p>
+        </div>
+       ))}
+
+
+    
+      return (
+     <div className="flex items-center gap-6 mt-6">
+     <PieChart width={90} height={90}>
+     <Pie
+      data={chart}
+      dataKey="pct"
+      innerRadius={28}
+      outerRadius={42}
+      paddingAngle={2}
+      stroke="none"
+    >
+    {chart.map((entry,i)=> (
+      <Cell key={i} fill={entry.color} />
+    ))}
+    </Pie>
+  </PieChart>
+
+    <div className="flex flex-col gap-1.5">
+      {chart.map((d,i)=>(
+        <div key={i} className="flex items-center gap-2">
+          <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: d.color }}
+        />
+        <p className="text-xs text-gray-300">{d.label}: {d.amount}%</p>
+        </div>
+      ))}
+    </div>
+  </div>
+      );
+      
+</div>
+      
+      
+
+              {/* EXPENSE LIST */}
+              <div className ="flex-1 bg-[#111] rounded-3xl p-5 border border-transparent mr-5 mt-2
+              hover:border-gray-400 hover:shadow-lg transition-all duration-300">
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 mb-2 px-4">
+                  <div className="text-xs text-gray-400 tracking-widest">CATEGORY</div>
+                  <div className="text-xs text-gray-400 tracking-widest">EXPECTED</div>
+                  <div className="text-xs text-gray-400 tracking-widest">ACTUAL</div>
+                  <div className="text-xs text-gray-400 tracking-widest">STATUS</div>
+                </div>
+              {/*Data Rows*/}
+              {[
+                {label:"Rent", expected:"₹18,000", actual:"₹18,000", status:"On Track", color:"text-green-700 bg-green-300"},
+                {label:"Groceries", expected:"₹8,000", actual:"₹8,400", status:"Over spent", color:"text-red-700 bg-red-300"},
+                {label:"Transportation", expected:"₹2,000", actual:"₹2,100", status:"Over spent", color:"text-red-700 bg-red-300"},
+                {label:"Investments", expected:"₹7,000", actual:"₹7,000", status:"On Track", color:"text-green-700 bg-green-300"},
+                {label:"Electricity Bill", expected:"₹2,500", actual:"₹2,500", status:"On Track", color:"text-green-700 bg-green-300"},
+                {label:"Water Bill", expected:"₹1,000", actual:"₹1,000", status:"On Track", color:"text-green-700 bg-green-300"},
+                {label:"Emergency Saving", expected:"₹5,000", actual:"₹5,000", status:"Not Used", color:"text-pink-700 bg-pink-300"},
+                {label:"Shopping", expected:"₹8,000", actual:"₹8,000", status:"On Track", color:"text-green-700 bg-green-300"},
+              ].map((row,i)=> (
+                <div key={i} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-4 items-center py-3 px-2 border-t border-white/10">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-2 h-2 rounded-full bg-gray-400 inline-block shrink-0"></span>
+                      <p className="text-white text-sm">{row.label}</p>
+                    </div>
+                    <p className="text-gray-300 text-sm">{row.expected}</p>
+                    <p className="text-white text-sm font-medium">{row.actual}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full w-fit ${row.color}`}>
+                     {row.status}
+                    </span>
+                 </div>
+              ))}
+              </div>
+          </div>
+        </div>
+       </div>
+                     {/*Stats Row*/}
+            <div className="h-px mt-6 mb-4" style={{
+                  background: "linear-gradient(135deg, #FFF7E6, #F7C8D3, #B46A72, #A8B58A, #A9B7C6, #2D3A47)",
+                  padding: "2px",
+                  width: "100%",
+                  height: "1px",
+                  zIndex: 0,
+                }}></div>
+          <div>
+              <div className="grid grid-cols-4 gap-4  px-4">
+                <div className ="bg-[#111] rounded-xl p-4 mb-4">
+                  <p className="text-xs text-gray-200 py-2">BUDGET</p>
+                  <p className="text-2xl font-bold text-blue-200">₹55,000</p>
+                 </div>
+                 <div className ="bg-[#111] rounded-xl p-4 mb-4">
+                 <p className="text-xs text-gray-200 py-2">SPENT</p>
+                 <p className="text-2xl font-bold text-white-400">₹47,600</p>
+                 </div>
+                 <div className ="bg-[#111] rounded-xl p-4 mb-4">
+                 <p className="text-xs text-gray-200 py-2">REMAINING</p>
+                 <p className="text-2xl font-bold text-green-200">₹2,600</p>
+                 </div>
+                 <div className ="bg-[#111] rounded-xl p-4 mb-4">
+                 <p className="text-xs text-gray-200 py-2">OVERSPENT ON</p>
+                 <p className="text-2xl font-bold text-red-300">2 items</p>
+              </div>
+      </div>
+      </div>
+    </div>
+   </div>
+      <div className="max-w-2xl text-center">
               <h3 className="text-xl font-semibold mb-3 text-white">
                 Track every rupee, effortlessly
               </h3>
@@ -68,7 +220,7 @@ export default function Hero() {
                 Mochi's finance tracker gives you a real-time snapshot of your June spending — broken down by category with a live chart, expected vs actual amounts, and instant status flags. See exactly where your money went, spot overruns at a glance, and always know how much budget you have left. No manual math, no Excel formulas — just clarity.
               </p>
             </div>
-          </div>
+
 
           {/* ── GOALS ── */}
           <div className="flex flex-col items-center gap-8">

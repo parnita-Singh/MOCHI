@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Mochi 🍡
+
+An AI-powered budgeting and expense tracking app built for people who want to understand their spending without being judged for it.
+
+Built as part of the **AWS Student Builder Cohort 2026** (AI + Cloud Track, Team Beach).
+
+---
+
+## What it does
+
+- Track expenses across categories
+- View a running total of spending
+- AI-powered spending insights *(in progress)*
+- Clean, kawaii-inspired interface built for Gen Z
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js, Tailwind CSS |
+| Database | AWS DynamoDB |
+| Deployment | AWS Amplify |
+| AI (planned) | AWS Bedrock |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+**Prerequisites:** Node.js (v18+), an AWS account
 
+**1. Clone the repo**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/PARNITA-SINGH/MOCHI.git
+cd MOCHI
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**2. Install dependencies**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+**3. Set up environment variables**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file in the root folder:
 
-## Learn More
+**4. Run locally**
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Live Demo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🔗 [MOCHI](https://wally-silk.vercel.app/)
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MOCHI/
+├── app/
+│   ├── api/
+│   │   └── expenses/
+│   │       └── route.js
+│   ├── layout.js
+│   ├── page.js
+│   └── globals.css
+│
+├── components/
+│        │   └──sections/
+│        │        └──Hero.jsx
+│        │
+│        ├── NavBar.jsx
+│        ├── Mascot.jsx
+│        ├──RainbowFloat.jsx
+├── public/
+│   └── MOCHI/
+└── README.md
+
+## Team
+
+| Name | GitHub |
+|---|---|
+| Parnita Singh | [@PARNITA-SINGH](https://github.com/PARNITA-SINGH) |
+| Prachi Mann | ([@prachimann](http://www.github.com/prachimaan)) |
+
+---
+
+## Weekly Progress
+
+**Week 1:** Project concept, branding, landing page scaffold, initial deployment.
+
+**Week 2:** Visual redesign (black background, unisex palette), custom mascot, floating hero animation, Sign In/Sign Up flow.
+
+**Week 3:** Working MVP with DynamoDB integration, API routes, expense tracking functionality.
