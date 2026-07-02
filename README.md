@@ -1,3 +1,4 @@
+
 # Mochi 🍡
 
 An AI-powered budgeting and expense tracking app built for people who want to understand their spending without being judged for it.
@@ -98,3 +99,5 @@ MOCHI/
 **Week 2:** Visual redesign (black background, unisex palette), custom mascot, floating hero animation, Sign In/Sign Up flow.
 
 **Week 3:** Working MVP with DynamoDB integration, API routes, expense tracking functionality.
+=======
+
