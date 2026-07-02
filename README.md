@@ -1,5 +1,5 @@
 
-<img width="347" height="262" alt="image" position ="center" src="https://github.com/user-attachments/assets/b741f18d-7b8d-4625-a12e-d11236a027c7" />
+<img width="347" height="262" alt="image" float: center src="https://github.com/user-attachments/assets/b741f18d-7b8d-4625-a12e-d11236a027c7" />
 
 ## Mochi
 An AI-powered budgeting and expense tracking app built for people who want to understand their spending without being judged for it.
