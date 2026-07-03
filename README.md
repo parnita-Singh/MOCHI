@@ -63,28 +63,40 @@ Open [http://localhost:3000](http://localhost:3000)
 ---
 
 ## Project Structure
----
 
+```
 MOCHI/
 ├── app/
 │   ├── api/
+│   │   ├── auth/
+│   │   │   └── [...nextauth]/
+│   │   │       └── route.js
 │   │   └── expenses/
 │   │       └── route.js
+│   ├── dashboard/
+│   │   └── page.jsx
+│   ├── sign-in/
+│   │   └── page.jsx
+│   ├── sign-up/
+│   │   └── page.jsx
 │   ├── layout.js
 │   ├── page.js
 │   └── globals.css
 │
 ├── components/
-│        │   └──sections/
-│        │        └──Hero.jsx
-│        │
-│        ├── NavBar.jsx
-│        ├── Mascot.jsx
-│        ├──RainbowFloat.jsx
+│   ├── sections/
+│   │   └── Hero.jsx
+│   ├── NavBar.jsx
+│   └── RainbowFloat.jsx
+│
+├── lib/
+│   └── dynamodb.js
+│
 ├── public/
 │   └── MOCHI/
+│
 └── README.md
-
+```
 ## Team
 
 | Name | GitHub |
