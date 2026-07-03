@@ -1,6 +1,8 @@
+<p align="center">
+<img width="347" height="262" alt="image" src="https://github.com/user-attachments/assets/b741f18d-7b8d-4625-a12e-d11236a027c7" />
+</p>
 
-# Mochi 🍡
-
+## Mochi
 An AI-powered budgeting and expense tracking app built for people who want to understand their spending without being judged for it.
 
 Built as part of the **AWS Student Builder Cohort 2026** (AI + Cloud Track, Team Beach).
@@ -12,7 +14,7 @@ Built as part of the **AWS Student Builder Cohort 2026** (AI + Cloud Track, Team
 - Track expenses across categories
 - View a running total of spending
 - AI-powered spending insights *(in progress)*
-- Clean, kawaii-inspired interface built for Gen Z
+- Clean interface 
 
 ---
 
@@ -88,7 +90,7 @@ MOCHI/
 | Name | GitHub |
 |---|---|
 | Parnita Singh | [@PARNITA-SINGH](https://github.com/PARNITA-SINGH) |
-| Prachi Mann | ([@prachimann](http://www.github.com/prachimaan)) |
+| Prachi Mann | [@prachimann](http://www.github.com/prachimaan) |
 
 ---
 
