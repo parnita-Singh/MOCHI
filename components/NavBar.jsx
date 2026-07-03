@@ -22,12 +22,18 @@ export default function Navbar({ minimal = false }) {
 
         {minimal && (
           <div className="flex gap-3">
-            <button className="px-5 py-2 rounded-full text-white font-medium border border-white/30 hover:bg-white/10 transition">
+            <a href="/sign-in">
+            <button className="px-5 py-2 rounded-full text-white font-medium border border-white/30 
+            hover:bg-white/10 transition cursor-pointer">
               SIGN IN
             </button>
-            <button className="bg-[#7087BB] hover:bg-[#8298c9] transition px-5 py-2 rounded-full text-white font-medium">
+            </a>
+            <a href="/sign-up">
+            <button className="bg-[#7087BB] hover:bg-[#8298c9] 
+            transition px-5 py-2 rounded-full text-white font-medium cursor-pointer">
               SIGN UP
             </button>
+            </a>
           </div>
         )}
       </div>
