@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { db } from "@/lib/dynamodb";
+import { db } from "../../../lib/dynamodb";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 
