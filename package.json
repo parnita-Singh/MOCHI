@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1079.0",
+    "@aws-sdk/lib-dynamodb": "^3.1079.0",
     "chart.js": "^4.5.1",
     "framer-motion": "^12.40.0",
     "next": "^16.2.10",
