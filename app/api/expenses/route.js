@@ -10,7 +10,7 @@ export async function POST(req) {
   const body = await req.json();
   const item = {
     userId: session.user.email,
-    id: randomUUID(),
+    transactionId: randomUUID(),
     amount: body.amount,
     category: body.category,
     date: body.date,
@@ -20,7 +20,7 @@ export async function POST(req) {
   };
 
   await db.send(new PutCommand({
-    TableName: "mochi-expenses",
+    TableName: "Transactions",
     Item: item,
   }));
 
@@ -29,13 +29,22 @@ export async function POST(req) {
 
 export async function GET() {
   const session = await getServerSession();
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-  const result = await db.send(new QueryCommand({
-    TableName: "mochi-expenses",
-    KeyConditionExpression: "userId = :uid",
-    ExpressionAttributeValues: { ":uid": session.user.email },
-  }));
+  if (!session) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  return Response.json({ expenses: result.Items });
+  const result = await db.send(
+    new QueryCommand({
+      TableName: "Transactions",
+      KeyConditionExpression: "userId = :uid",
+      ExpressionAttributeValues: {
+        ":uid": session.user.email,
+      },
+    })
+  );
+
+  return Response.json({
+    expenses: result.Items ?? [],
+  });
 }

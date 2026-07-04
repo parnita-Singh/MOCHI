@@ -1,334 +1,789 @@
 "use client";
-export const dynamic = "force-dynamic";
-import { useSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+ 
+import { useState, useEffect } from "react";
+ 
+/* ---------------------------------------------------------
+   Swap this for your real auth/session data — e.g. the
+   result of useSession(), a server-passed prop, or a
+   /api/me call. Whatever it returns just needs a `name`.
+--------------------------------------------------------- */
+function useCurrentUser() {
+  return { name: "Parnita Singh" };
+}
  
 const CATEGORIES = [
-  { label: "🏠 Rent", value: "Rent", color: "#A9B7C6" },
-  { label: "🛒 Groceries", value: "Groceries", color: "#A8B58A" },
-  { label: "🍽 Dining", value: "Dining", color: "#F7C8D3" },
-  { label: "⚡ Utilities", value: "Utilities", color: "#FFF7E6" },
-  { label: "🎯 Goals", value: "Goals", color: "#B46A72" },
-  { label: "✦ Extras", value: "Extras", color: "#888" },
+  { key: "rent", label: "Rent", color: "#B46A72" },
+  { key: "groceries", label: "Groceries", color: "#A8B58A" },
+  { key: "dining", label: "Dining", color: "#F7C8D3" },
+  { key: "utilities", label: "Utilities", color: "#A9B7C6" },
+  { key: "goals", label: "Goals", color: "#FFF7E6" },
+  { key: "extras", label: "Extras", color: "#A9B7C6" },
 ];
  
-const PAYMENTS = ["UPI", "Card", "Cash", "Bank"];
+const PAYMENTS = ["UPI", "Card", "Cash", "Bank", "Wallet", "Cheque"];
  
-export default function Dashboard() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+const DEFAULT_BUDGET = 55000;
  
-  const [expenses, setExpenses] = useState([]);
-  const [form, setForm] = useState({
-    amount: "",
-    date: new Date().toISOString().split("T")[0],
-    payment: "UPI",
-    category: "Groceries",
-    notes: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
+function formatINR(n) {
+  return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+}
+function capitalize(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+ 
+export default function MochiExpenseTracker() {
+  const user = useCurrentUser();
+ 
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState(null);
+  const [payment, setPayment] = useState(null);
+  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [shake, setShake] = useState(null);
+ 
+  /* ---------- budget: user-editable, persisted per browser ---------- */
+  const [budget, setBudget] = useState(DEFAULT_BUDGET);
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetDraft, setBudgetDraft] = useState("");
  
   useEffect(() => {
-    if (status === "unauthenticated") router.push("/sign-in");
-  }, [status, router]);
+    setDate(new Date().toISOString().slice(0, 10));
+    const saved = typeof window !== "undefined" && localStorage.getItem("mochi_budget");
+    if (saved) setBudget(Number(saved));
+  }, []);
  
-  useEffect(() => {
-    if (status === "authenticated") fetchExpenses();
-  }, [status]);
- 
-  async function fetchExpenses() {
-    setFetching(true);
-    const res = await fetch("/api/expenses");
-    const data = await res.json();
-    setExpenses(data.expenses || []);
-    setFetching(false);
+  function saveBudget() {
+    const val = parseFloat(budgetDraft);
+    if (val > 0) {
+      setBudget(val);
+      if (typeof window !== "undefined") localStorage.setItem("mochi_budget", String(val));
+    }
+    setEditingBudget(false);
+    setBudgetDraft("");
   }
  
-  async function handleAdd() {
-    if (!form.amount || isNaN(Number(form.amount))) return;
-    setLoading(true);
-    await fetch("/api/expenses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, amount: Number(form.amount) }),
-    });
-    setForm({ ...form, amount: "", notes: "" });
-    await fetchExpenses();
-    setLoading(false);
+  function flash(field) {
+    setShake(field);
+    setTimeout(() => setShake(null), 400);
   }
  
-  const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const budget = 55000;
-  const pct = Math.min(Math.round((total / budget) * 100), 100);
-  const remaining = budget - total;
+  function addExpense() {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0) return flash("amount");
+    if (!category) return flash("category");
+    if (!payment) return flash("payment");
  
-  const byCategory = CATEGORIES.map((cat) => {
-    const sum = expenses
-      .filter((e) => e.category === cat.value)
-      .reduce((s, e) => s + Number(e.amount), 0);
-    const barPct = total > 0 ? Math.round((sum / total) * 100) : 0;
-    return { ...cat, sum, barPct };
-  }).filter((c) => c.sum > 0);
- 
-  const topCat = [...byCategory].sort((a, b) => b.sum - a.sum)[0];
- 
-  if (status === "loading") {
-    return (
-      <main style={{ background: "#0a0a0a", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#555", fontFamily: "sans-serif" }}>
-        Loading...
-      </main>
-    );
+    setTransactions((prev) => [
+      ...prev,
+      { amount: amt, category, payment, date: date || new Date().toISOString().slice(0, 10), notes: notes.trim() },
+    ]);
+    setAmount("");
+    setNotes("");
+    setCategory(null);
+    setPayment(null);
+    setHistoryOpen(true);
   }
+ 
+  const total = transactions.reduce((s, t) => s + t.amount, 0);
+  const left = Math.max(budget - total, 0);
+  const pct = budget > 0 ? Math.min(Math.round((total / budget) * 100), 100) : 0;
+  const byCategory = {};
+  transactions.forEach((t) => (byCategory[t.category] = (byCategory[t.category] || 0) + t.amount));
+  const top = Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0];
+  const catColor = (key) => CATEGORIES.find((c) => c.key === key)?.color || "#A9B7C6";
  
   return (
-    <main className="dash-main" style={{ background: "#0a0a0a", minHeight: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#f0ede8", padding: "24px" }}>
-
-      <style jsx>{`
-        .dash-main {
-          padding: 24px;
-        }
-        .top-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          margin-bottom: 16px;
-        }
-        .top-grid,
-        .bottom-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 14px;
-          margin-bottom: 14px;
-        }
-        .stat-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-          margin-bottom: 12px;
-        }
-        .field-row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-          margin-bottom: 10px;
-        }
-        @media (max-width: 860px) {
-          .top-grid,
-          .bottom-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        @media (max-width: 480px) {
-          .dash-main {
-            padding: 14px;
-          }
-          .stat-grid {
-            grid-template-columns: 1fr;
-          }
-          .field-row {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
- 
-      {/* Top bar */}
-      <div className="top-bar">
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#2D3A47", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 500, color: "#A9B7C6", flexShrink: 0 }}>
-            {session?.user?.name?.slice(0, 2).toUpperCase() || "ME"}
-          </div>
-          <div>
-            <div style={{ fontSize: "14px", fontWeight: 500 }}>Good day, {session?.user?.name?.split(" ")[0]}</div>
-            <div style={{ fontSize: "11px", color: "#555" }}>July 2026 · {pct}% of budget used</div>
-          </div>
+    <div className="app">
+      <header>
+        <div className="brand">
+          <span className="dot" />
+          Mochi
         </div>
-        <button onClick={() => signOut({ callbackUrl: "/" })} style={{ fontSize: "11px", color: "#555", background: "none", border: "1px solid #222", borderRadius: "8px", padding: "6px 12px", cursor: "pointer", fontFamily: "inherit" }}>
-          Sign out
-        </button>
-      </div>
- 
-      {/* Rainbow divider */}
-      <div style={{ height: "1px", background: "linear-gradient(90deg,#FFF7E6,#F7C8D3,#B46A72,#A8B58A,#A9B7C6,#2D3A47)", opacity: 0.4, marginBottom: "16px" }} />
- 
-      {/* Top grid — form + list */}
-      <div className="top-grid">
- 
-        {/* ADD EXPENSE FORM */}
-        <div style={{ background: "#111", borderRadius: "14px", border: "1px solid #1e1e1e", padding: "18px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg,#F7C8D3,#B46A72)" }} />
-          <div style={{ fontSize: "10px", color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Add expense</div>
- 
-          <div style={{ marginBottom: "10px" }}>
-            <label style={{ fontSize: "10px", color: "#666", display: "block", marginBottom: "4px" }}>Amount (₹)</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
-              style={{ width: "100%", background: "#161616", border: "1px solid #A9B7C6", borderRadius: "7px", padding: "8px 10px", fontSize: "12px", color: "#d0cdc8", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
-            />
+        <div className="header-right">
+          <div className="user-chip">
+            <div className="avatar">{user.name.trim().charAt(0).toUpperCase()}</div>
+            <span className="userName">{user.name}</span>
           </div>
+          <button className="signout">Sign out</button>
+          <button className="kebab">⋯</button>
+        </div>
+      </header>
  
-          <div className="field-row">
-            <div>
-              <label style={{ fontSize: "10px", color: "#666", display: "block", marginBottom: "4px" }}>Date</label>
+      <div className="grid">
+        {/* ================= ADD EXPENSE ================= */}
+        <div className="panel">
+          <div className="eyebrow">Add Expense</div>
+ 
+          <div className="amount-row">
+            <label className="field-label">Amount (₹)</label>
+            <div className={`amount-wrap ${shake === "amount" ? "shake" : ""}`}>
+              <span className="cur">₹</span>
               <input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                style={{ width: "100%", background: "#161616", border: "1px solid #222", borderRadius: "7px", padding: "8px 10px", fontSize: "11px", color: "#d0cdc8", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+                type="text"
+                inputMode="decimal"
+                placeholder="0"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
               />
             </div>
+          </div>
+ 
+          <div className="section">
+            <label className="field-label">Category</label>
+            <div className={`pills ${shake === "category" ? "shake" : ""}`}>
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c.key}
+                  className={`pill ${category === c.key ? "active" : ""}`}
+                  style={
+                    category === c.key
+                      ? { borderColor: c.color, background: c.color + "26", color: "#F5F3EF" }
+                      : {}
+                  }
+                  onClick={() => setCategory(c.key)}
+                >
+                  <span className="swatch" style={{ background: c.color }} />
+                  {c.label}
+                </button>
+              ))}
+              <button className="pill custom">+ Custom</button>
+            </div>
+          </div>
+ 
+          <div className="two-col">
             <div>
-              <label style={{ fontSize: "10px", color: "#666", display: "block", marginBottom: "4px" }}>Payment</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+              <label className="field-label">Date</label>
+              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div>
+              <label className="field-label">Mode of Payment</label>
+              <div className={`pay-grid ${shake === "payment" ? "shake" : ""}`}>
                 {PAYMENTS.map((p) => (
-                  <span key={p} onClick={() => setForm({ ...form, payment: p })}
-                    style={{ fontSize: "10px", padding: "3px 8px", borderRadius: "99px", border: `1px solid ${form.payment === p ? "#B46A72" : "#222"}`, color: form.payment === p ? "#B46A72" : "#666", background: form.payment === p ? "rgba(180,106,114,0.1)" : "transparent", cursor: "pointer" }}>
+                  <button
+                    key={p}
+                    className={`pay ${payment === p ? "active" : ""}`}
+                    onClick={() => setPayment(p)}
+                  >
                     {p}
-                  </span>
+                  </button>
                 ))}
+                <button className="pay custom">+ Other</button>
               </div>
             </div>
           </div>
  
-          <div style={{ marginBottom: "10px" }}>
-            <label style={{ fontSize: "10px", color: "#666", display: "block", marginBottom: "4px" }}>Category</label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
-              {CATEGORIES.map((c) => (
-                <span key={c.value} onClick={() => setForm({ ...form, category: c.value })}
-                  style={{ fontSize: "10px", padding: "3px 9px", borderRadius: "99px", border: `1px solid ${form.category === c.value ? "#B46A72" : "#222"}`, color: form.category === c.value ? "#B46A72" : "#666", background: form.category === c.value ? "rgba(180,106,114,0.1)" : "transparent", cursor: "pointer" }}>
-                  {c.label}
-                </span>
-              ))}
-            </div>
-          </div>
- 
-          <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontSize: "10px", color: "#666", display: "block", marginBottom: "4px" }}>Notes (optional)</label>
+          <div className="section">
+            <label className="field-label">Notes (optional)</label>
             <input
               type="text"
-              placeholder="e.g. Weekly grocery run"
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              style={{ width: "100%", background: "#161616", border: "1px solid #222", borderRadius: "7px", padding: "8px 10px", fontSize: "11px", color: "#d0cdc8", fontFamily: "inherit", outline: "none", boxSizing: "border-box" }}
+              placeholder="Any info to add on?"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
             />
           </div>
  
-          <button onClick={handleAdd} disabled={loading}
-            style={{ width: "100%", padding: "9px", borderRadius: "8px", border: "none", background: loading ? "#333" : "linear-gradient(135deg,#B46A72,#A9B7C6)", color: "#f0ede8", fontSize: "12px", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit" }}>
-            {loading ? "Saving..." : "+ Add expense"}
+          <button className="add-btn" onClick={addExpense}>
+            + Add expense
           </button>
         </div>
  
-        {/* TRANSACTION LIST */}
-        <div style={{ background: "#111", borderRadius: "14px", border: "1px solid #1e1e1e", padding: "18px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg,#A9B7C6,#2D3A47)" }} />
-          <div style={{ fontSize: "10px", color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Transactions · July</div>
+        {/* ================= OVERVIEW ================= */}
+        <div className="panel">
+          <div className="eyebrow">Overview</div>
  
-          {fetching ? (
-            <div style={{ fontSize: "12px", color: "#555", textAlign: "center", padding: "20px 0" }}>Loading...</div>
-          ) : expenses.length === 0 ? (
-            <div style={{ fontSize: "12px", color: "#555", textAlign: "center", padding: "20px 0" }}>No expenses yet — add your first one.</div>
-          ) : (
-            [...expenses].reverse().slice(0, 6).map((e, i) => {
-              const cat = CATEGORIES.find((c) => c.value === e.category);
-              return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 0", borderBottom: i < 5 ? "1px solid #161616" : "none" }}>
-                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: cat?.color || "#888", flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "12px", color: "#d0cdc8", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.notes || e.category}</div>
-                    <div style={{ fontSize: "10px", color: "#555", display: "flex", gap: "5px", alignItems: "center", flexWrap: "wrap" }}>
-                      <span style={{ fontSize: "9px", padding: "1px 6px", borderRadius: "99px", background: `${cat?.color}20`, color: cat?.color }}>{cat?.label || e.category}</span>
-                      <span>{e.date} · {e.payment}</span>
+          <div className="stats-grid">
+            <div className="stat spent">
+              <div className="stat-label">Total Spent</div>
+              <div className="stat-value">{formatINR(total)}</div>
+            </div>
+            <div className="stat txn">
+              <div className="stat-label">Transactions</div>
+              <div className="stat-value">{transactions.length}</div>
+            </div>
+            <div className="stat top">
+              <div className="stat-label">Top Category</div>
+              <div className="stat-value small">{top ? capitalize(top[0]) : "—"}</div>
+            </div>
+            <div className="stat left">
+              <div className="stat-label">Budget Left</div>
+              <div className="stat-value">{formatINR(left)}</div>
+            </div>
+          </div>
+ 
+          <div className={`history-toggle ${historyOpen ? "open" : ""}`} onClick={() => setHistoryOpen((o) => !o)}>
+            <div className="htitle">
+              Transaction history <span className="badge">{transactions.length}</span>
+            </div>
+            <span className="chev">⌄</span>
+          </div>
+ 
+          {historyOpen && (
+            <div className="history-list">
+              {transactions.length === 0 ? (
+                <div className="empty-note">No transactions yet — add your first expense.</div>
+              ) : (
+                transactions
+                  .slice()
+                  .reverse()
+                  .map((t, i) => (
+                    <div className="txn-row" key={i}>
+                      <div className="txn-left">
+                        <span className="txn-dot" style={{ background: catColor(t.category) }} />
+                        <div>
+                          <div>
+                            {capitalize(t.category)}
+                            {t.notes ? ` · ${t.notes}` : ""}
+                          </div>
+                          <div className="txn-meta">
+                            {t.date} · {t.payment}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="txn-amt">{formatINR(t.amount)}</div>
                     </div>
-                  </div>
-                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#B46A72", flexShrink: 0 }}>-₹{Number(e.amount).toLocaleString()}</div>
-                </div>
-              );
-            })
-          )}
- 
-          {expenses.length > 0 && (
-            <div style={{ background: "#161616", borderRadius: "9px", border: "1px solid #1e1e1e", padding: "10px 12px", fontSize: "11px", color: "#A8B58A", lineHeight: 1.6, marginTop: "10px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#B46A72", marginTop: "4px", flexShrink: 0 }} />
-              <span>
-                {topCat ? `${topCat.label} is your biggest spend at ${topCat.barPct}% of total.` : "Keep tracking — Mochi AI insights will appear here."}
-                {pct < 60 ? " You're on track for the month." : pct < 85 ? " Keep an eye on spending this month." : " Budget running low — consider cutting back."}
-              </span>
+                  ))
+              )}
             </div>
           )}
+ 
+          <div className="budget-block">
+            <div className="budget-row">
+              <span>Budget used</span>
+              <span className="pct">{pct}%</span>
+            </div>
+            <div className="budget-bar">
+              <div className="budget-fill" style={{ width: `${pct}%` }} />
+            </div>
+ 
+            <div className="budget-foot">
+              {editingBudget ? (
+                <div className="budget-edit">
+                  <span className="cur small">₹</span>
+                  <input
+                    autoFocus
+                    type="text"
+                    inputMode="decimal"
+                    className="budget-input"
+                    placeholder={String(budget)}
+                    value={budgetDraft}
+                    onChange={(e) => setBudgetDraft(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && saveBudget()}
+                  />
+                  <button className="budget-save" onClick={saveBudget}>
+                    Save
+                  </button>
+                  <button className="budget-cancel" onClick={() => setEditingBudget(false)}>
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <span>
+                    of {formatINR(budget)} budget{" "}
+                    <button
+                      className="edit-budget-link"
+                      onClick={() => {
+                        setBudgetDraft(String(budget));
+                        setEditingBudget(true);
+                      }}
+                    >
+                      edit
+                    </button>
+                  </span>
+                  <span>{formatINR(left)} remaining</span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
  
-      {/* Bottom grid — totals + category breakdown */}
-      <div className="bottom-grid">
+      <style jsx>{`
+        :root {
+        }
+        .app {
+          --bg: #0a0a0b;
+          --bg-panel: #131315;
+          --bg-panel-2: #17181b;
+          --line: rgba(255, 255, 255, 0.08);
+          --line-soft: rgba(255, 255, 255, 0.05);
+          --text-hi: #f5f3ef;
+          --text-mid: #9a9a9f;
+          --text-low: #63636a;
  
-        {/* RUNNING TOTAL */}
-        <div style={{ background: "#111", borderRadius: "14px", border: "1px solid #1e1e1e", padding: "18px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg,#A8B58A,#A9B7C6)" }} />
-          <div style={{ fontSize: "10px", color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Running total · July 2026</div>
+          --vanilla: #fff7e6;
+          --blush: #f7c8d3;
+          --rosewood: #b46a72;
+          --sage: #a8b58a;
+          --misty: #a9b7c6;
+          --lagoon: #2d3a47;
  
-          <div className="stat-grid">
-            {[
-              { label: "Total spent", value: `₹${total.toLocaleString()}`, color: "#B46A72" },
-              { label: "Transactions", value: expenses.length, color: "#A9B7C6" },
-              { label: "Daily average", value: `₹${Math.round(total / (new Date().getDate())).toLocaleString()}`, color: "#FFF7E6" },
-              { label: "Top category", value: topCat?.label || "—", color: "#A9B7C6" },
-            ].map((k) => (
-              <div key={k.label} style={{ background: "#161616", borderRadius: "9px", padding: "10px 12px", border: "1px solid #1e1e1e" }}>
-                <div style={{ fontSize: "9px", color: "#555", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "3px" }}>{k.label}</div>
-                <div style={{ fontSize: "17px", fontWeight: 600, letterSpacing: "-0.3px", color: k.color }}>{k.value}</div>
-              </div>
-            ))}
-          </div>
+          --rosewood-tint: rgba(180, 106, 114, 0.16);
+          --lagoon-tint: rgba(45, 58, 71, 0.55);
  
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#555", marginBottom: "5px" }}>
-              <span>Budget used · ₹{total.toLocaleString()} of ₹{budget.toLocaleString()}</span>
-              <span style={{ color: "#A8B58A" }}>{pct}%</span>
-            </div>
-            <div style={{ height: "5px", background: "#1e1e1e", borderRadius: "99px", overflow: "hidden" }}>
-              <div style={{ width: `${pct}%`, height: "100%", borderRadius: "99px", background: "linear-gradient(90deg,#A8B58A,#A9B7C6)", transition: "width 0.5s ease" }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#555", marginTop: "5px" }}>
-              <span>Budget left</span>
-              <span style={{ color: remaining > 0 ? "#A8B58A" : "#B46A72", fontWeight: 500 }}>₹{Math.abs(remaining).toLocaleString()} {remaining < 0 ? "over budget" : "remaining"}</span>
-            </div>
-          </div>
-        </div>
+          background: var(--bg);
+          color: var(--text-hi);
+          font-family: "Inter", sans-serif;
+          max-width: 1180px;
+          margin: 0 auto;
+          padding: 28px 24px 60px;
+        }
  
-        {/* CATEGORY BREAKDOWN */}
-        <div style={{ background: "#111", borderRadius: "14px", border: "1px solid #1e1e1e", padding: "18px", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2px", background: "linear-gradient(90deg,#FFF7E6,#F7C8D3)" }} />
-          <div style={{ fontSize: "10px", color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "14px" }}>Spending by category</div>
+        header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 22px;
+          margin-bottom: 28px;
+          border-bottom: 1px solid var(--line);
+        }
+        .brand {
+          font-family: "Fraunces", serif;
+          font-weight: 600;
+          font-size: 26px;
+          letter-spacing: -0.01em;
+          color: var(--vanilla);
+          display: flex;
+          align-items: center;
+          gap: 9px;
+        }
+        .dot {
+          width: 9px;
+          height: 9px;
+          border-radius: 50%;
+          background: var(--rosewood);
+          box-shadow: 0 0 0 4px var(--rosewood-tint);
+        }
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .user-chip {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 14px;
+          color: var(--text-mid);
+        }
+        .avatar {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: var(--lagoon);
+          color: var(--misty);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 600;
+          border: 1px solid var(--line);
+        }
+        .userName {
+          color: var(--text-hi);
+          font-weight: 500;
+        }
+        .signout {
+          background: transparent;
+          border: 1px solid var(--line);
+          color: var(--text-hi);
+          font-size: 13px;
+          padding: 8px 16px;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        .signout:hover {
+          border-color: var(--rosewood);
+          background: var(--rosewood-tint);
+        }
+        .kebab {
+          background: none;
+          border: none;
+          color: var(--text-mid);
+          font-size: 18px;
+          cursor: pointer;
+          padding: 6px;
+        }
  
-          {byCategory.length === 0 ? (
-            <div style={{ fontSize: "12px", color: "#555", textAlign: "center", padding: "20px 0" }}>Add expenses to see breakdown.</div>
-          ) : (
-            byCategory.map((cat) => (
-              <div key={cat.value} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
-                <span style={{ fontSize: "11px", color: "#d0cdc8", width: "90px", flexShrink: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat.label}</span>
-                <div style={{ flex: 1, height: "4px", background: "#1e1e1e", borderRadius: "99px", overflow: "hidden" }}>
-                  <div style={{ width: `${cat.barPct}%`, height: "100%", borderRadius: "99px", background: cat.color, transition: "width 0.5s ease" }} />
-                </div>
-                <span style={{ fontSize: "10px", color: "#555", width: "50px", textAlign: "right", flexShrink: 0 }}>₹{cat.sum.toLocaleString()}</span>
-              </div>
-            ))
-          )}
+        .grid {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          gap: 22px;
+        }
+        @media (max-width: 860px) {
+          .grid {
+            grid-template-columns: 1fr;
+          }
+        }
  
-          {expenses.length > 0 && (
-            <div style={{ background: "#161616", borderRadius: "9px", border: "1px solid #1e1e1e", padding: "10px 12px", fontSize: "11px", color: "#A8B58A", lineHeight: 1.6, marginTop: "12px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#B46A72", marginTop: "4px", flexShrink: 0 }} />
-              <span>You're {pct}% through the budget{pct < 50 ? " with most of the month left. You're doing well." : pct < 80 ? ". Stay mindful of spending." : ". Budget is nearly full."}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </main>
+        .panel {
+          background: var(--bg-panel);
+          border: 1px solid var(--line);
+          border-radius: 16px;
+          padding: 26px;
+        }
+ 
+        .eyebrow {
+          font-size: 11.5px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: var(--text-low);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        .eyebrow::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, var(--line), transparent);
+        }
+ 
+        .field-label {
+          display: block;
+          font-size: 12px;
+          color: var(--text-mid);
+          margin-bottom: 9px;
+          letter-spacing: 0.03em;
+          text-transform: uppercase;
+        }
+ 
+        .amount-row {
+          margin-bottom: 22px;
+        }
+        .amount-wrap {
+          display: flex;
+          align-items: baseline;
+          gap: 6px;
+          border-bottom: 1px solid var(--line);
+          padding-bottom: 12px;
+        }
+        .amount-wrap .cur {
+          font-size: 22px;
+          color: var(--text-low);
+          font-family: "Fraunces", serif;
+        }
+        .amount-wrap input {
+          background: none;
+          border: none;
+          outline: none;
+          color: var(--text-hi);
+          font-family: "Fraunces", serif;
+          font-size: 34px;
+          font-weight: 500;
+          width: 100%;
+        }
+ 
+        .section {
+          margin-bottom: 22px;
+        }
+        .pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 9px;
+        }
+        .pill {
+          border: 1px solid var(--line);
+          background: var(--bg-panel-2);
+          color: var(--text-mid);
+          font-size: 13px;
+          padding: 9px 15px;
+          border-radius: 20px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          transition: all 0.15s ease;
+        }
+        .pill .swatch {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .pill:hover {
+          color: var(--text-hi);
+        }
+        .pill.custom {
+          border-style: dashed;
+        }
+ 
+        .two-col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 22px;
+          margin-bottom: 22px;
+        }
+        input[type="date"],
+        input[type="text"] {
+          width: 100%;
+          background: var(--bg-panel-2);
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          padding: 11px 13px;
+          color: var(--text-hi);
+          font-family: "Inter", sans-serif;
+          font-size: 14px;
+          outline: none;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(0.6);
+          cursor: pointer;
+        }
+ 
+        .pay-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 9px;
+        }
+        .pay {
+          border: 1px solid var(--line);
+          background: var(--bg-panel-2);
+          color: var(--text-mid);
+          font-size: 13px;
+          padding: 9px 14px;
+          border-radius: 20px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .pay:hover {
+          color: var(--text-hi);
+        }
+        .pay.active {
+          background: var(--rosewood-tint);
+          border-color: var(--rosewood);
+          color: var(--vanilla);
+        }
+        .pay.custom {
+          border-style: dashed;
+        }
+ 
+        .add-btn {
+          width: 100%;
+          background: var(--rosewood);
+          color: #1a0f10;
+          border: none;
+          font-weight: 600;
+          font-size: 14.5px;
+          padding: 15px;
+          border-radius: 11px;
+          cursor: pointer;
+        }
+        .add-btn:hover {
+          filter: brightness(1.12);
+        }
+ 
+        .stats-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-bottom: 18px;
+        }
+        .stat {
+          background: var(--bg-panel-2);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          padding: 16px 17px;
+        }
+        .stat-label {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-low);
+          margin-bottom: 8px;
+        }
+        .stat-value {
+          font-family: "Fraunces", serif;
+          font-size: 23px;
+          font-weight: 500;
+        }
+        .stat-value.small {
+          font-size: 16px;
+          font-family: "Inter", sans-serif;
+        }
+        .stat.spent .stat-value {
+          color: var(--rosewood);
+        }
+        .stat.txn .stat-value {
+          color: var(--misty);
+        }
+        .stat.top .stat-value {
+          color: var(--sage);
+        }
+        .stat.left .stat-value {
+          color: var(--vanilla);
+        }
+ 
+        .history-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: var(--bg-panel-2);
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          padding: 14px 17px;
+          cursor: pointer;
+          margin-bottom: 18px;
+        }
+        .htitle {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+        }
+        .badge {
+          background: var(--lagoon-tint);
+          color: var(--misty);
+          font-size: 12px;
+          padding: 2px 9px;
+          border-radius: 20px;
+        }
+        .chev {
+          color: var(--text-low);
+          transition: transform 0.2s ease;
+        }
+        .history-toggle.open .chev {
+          transform: rotate(180deg);
+        }
+ 
+        .history-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-bottom: 18px;
+          max-height: 220px;
+          overflow-y: auto;
+        }
+        .txn-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 11px 13px;
+          background: var(--bg-panel-2);
+          border: 1px solid var(--line-soft);
+          border-radius: 10px;
+          font-size: 13px;
+        }
+        .txn-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .txn-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+        }
+        .txn-meta {
+          color: var(--text-low);
+          font-size: 11.5px;
+        }
+        .txn-amt {
+          font-family: "Fraunces", serif;
+        }
+        .empty-note {
+          color: var(--text-low);
+          font-size: 13px;
+          padding: 6px 2px;
+        }
+ 
+        .budget-block {
+          margin-top: 6px;
+        }
+        .budget-row {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          color: var(--text-mid);
+          margin-bottom: 9px;
+        }
+        .pct {
+          color: var(--sage);
+        }
+        .budget-bar {
+          height: 7px;
+          border-radius: 20px;
+          background: var(--bg-panel-2);
+          border: 1px solid var(--line-soft);
+          overflow: hidden;
+        }
+        .budget-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--rosewood), var(--blush));
+          border-radius: 20px;
+          transition: width 0.3s ease;
+        }
+        .budget-foot {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 12px;
+          color: var(--text-low);
+          margin-top: 9px;
+        }
+        .edit-budget-link {
+          background: none;
+          border: none;
+          color: var(--misty);
+          font-size: 12px;
+          text-decoration: underline;
+          cursor: pointer;
+          padding: 0;
+          margin-left: 4px;
+        }
+        .budget-edit {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          width: 100%;
+        }
+        .cur.small {
+          font-family: "Fraunces", serif;
+          color: var(--text-low);
+        }
+        .budget-input {
+          background: var(--bg-panel-2) !important;
+          border: 1px solid var(--rosewood) !important;
+          border-radius: 6px !important;
+          padding: 5px 8px !important;
+          color: var(--text-hi) !important;
+          font-size: 12px !important;
+          width: 90px !important;
+        }
+        .budget-save,
+        .budget-cancel {
+          background: none;
+          border: 1px solid var(--line);
+          color: var(--text-mid);
+          font-size: 11px;
+          padding: 4px 9px;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .budget-save:hover {
+          border-color: var(--sage);
+          color: var(--sage);
+        }
+        .budget-cancel:hover {
+          border-color: var(--rosewood);
+          color: var(--rosewood);
+        }
+ 
+        .shake {
+          animation: shake 0.35s ease;
+        }
+        @keyframes shake {
+          25% {
+            transform: translateX(-4px);
+          }
+          75% {
+            transform: translateX(4px);
+          }
+        }
+      `}</style>
+    </div>
   );
 }
+ 
