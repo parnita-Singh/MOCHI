@@ -39,3 +39,11 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+export const metadata = {
+  title: "Mochi",
+  description: "AI-powered budgeting app",
+  icons: {
+    icon: "/photos/MOCHI.png",
+  },
+};
