@@ -10,11 +10,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  title: "MOCHI",
-  description: "Your personal wallet tracker and financial assistant",
-};
-
 
 import { Press_Start_2P, Quicksand } from "next/font/google";
 
@@ -42,7 +37,7 @@ export default function RootLayout({ children }) {
 
 export const metadata = {
   title: "Mochi",
-  description: "AI-powered budgeting app",
+  description: "Your personal wallet tracker and financial assistant",
   icons: {
     icon: "/photos/MOCHI.png",
   },
