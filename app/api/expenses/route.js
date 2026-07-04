@@ -10,7 +10,7 @@ export async function POST(req) {
   const body = await req.json();
   const item = {
     userId: session.user.email,
-    id: randomUUID(),
+    transactionId: randomUUID(),
     amount: body.amount,
     category: body.category,
     date: body.date,
