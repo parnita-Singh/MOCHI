@@ -28,7 +28,7 @@ export const metadata = {
   title: "Mochi",
   description: "Your personal wallet tracker and financial assistant",
   icons: {
-    icon: "/photos/MOCHI.png",
+    icon: "/photos/logo.png",
   },
 };
 
