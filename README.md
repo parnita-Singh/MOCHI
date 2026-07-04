@@ -58,7 +58,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Live Demo
 
-🔗 [MOCHI](https://wally-silk.vercel.app/)
+🔗 [MOCHI](https://main.d3bxx53jps67fn.amplifyapp.com/)
 
 ---
 
