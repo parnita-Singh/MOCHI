@@ -1,5 +1,7 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Press_Start_2P, Quicksand } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -9,9 +11,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-
-import { Press_Start_2P, Quicksand } from "next/font/google";
 
 const pixelFont = Press_Start_2P({
   subsets: ["latin"],
@@ -25,16 +24,6 @@ const bodyFont = Quicksand({
   weight: ["400", "500", "600", "700"],
 });
 
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body className={`${pixelFont.variable} ${bodyFont.variable}`}>
-        {children}
-      </body>
-    </html>
-  );
-}
-
 export const metadata = {
   title: "Mochi",
   description: "Your personal wallet tracker and financial assistant",
@@ -43,16 +32,13 @@ export const metadata = {
   },
 };
 
-"use client";
-import { SessionProvider } from "next-auth/react";
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${pixelFont.variable} ${bodyFont.variable}`}
+      >
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
