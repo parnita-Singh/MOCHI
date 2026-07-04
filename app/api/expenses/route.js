@@ -1,4 +1,4 @@
-import { db } from "../../lib/dynamodb";
+import { db } from "../../../lib/dynamodb";
 import { PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { getServerSession } from "next-auth";
 import { randomUUID } from "crypto";
