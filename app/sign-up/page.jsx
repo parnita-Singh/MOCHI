@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import {signUp} from "next-auth/react";
+import {signIn, signUp} from "next-auth/react";
  
 export default function SignUp() {
   const [password, setPassword] = useState("");
@@ -136,7 +136,7 @@ export default function SignUp() {
           <span style={{ color: "#555", fontSize: "12px" }}>sign-up with Google</span>
           <div style={{ flex: 1, height: "1px", background: "#333" }} />
         </div>
-        <button onClick={()=> signUp("google",{callbackUrl:"/dashboard"})}
+        <button onClick={()=> signIn("google",{callbackUrl:"/dashboard"})}
           style={{
             width:"100%",
             padding:"14px",
