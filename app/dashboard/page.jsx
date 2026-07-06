@@ -23,6 +23,7 @@ const CATEGORIES = [
 const PAYMENTS = ["UPI", "Card", "Cash", "Bank", "Wallet", "Cheque"];
  
 const DEFAULT_BUDGET = 55000;
+const MAX_AMOUNT = 99999999;
  
 function formatINR(n) {
   return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -72,6 +73,10 @@ export default function MochiExpenseTracker() {
   function addExpense() {
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return flash("amount");
+      if (amt > MAX_AMOUNT) {
+    alert(`Amount cannot exceed ${formatINR(MAX_AMOUNT)}`);
+    return flash("amount");
+  }
     if (!category) return flash("category");
     if (!payment) return flash("payment");
  
