@@ -1,6 +1,6 @@
 # Mochi — Deployment Architecture
 
-**Live URL:** _[add your Amplify app URL here]_
+**Live URL:** _[https://main.d3bxx53jps67fn.amplifyapp.com/]_
 
 ## Overview
 
