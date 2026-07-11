@@ -62,6 +62,9 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
+See [Architecture](./architecture.md) for deployment details.
+
+
 ## Project Structure
 
 ```

@@ -265,7 +265,7 @@ function GlobalStyles() {
         transition: background 0.2s ease, color 0.2s ease;
       }
       .mochi-nav-link:hover {
-        background: #000000;
+        background: #1a1f26;
         color: #fff7e6;
       }
 
@@ -288,7 +288,7 @@ function GlobalStyles() {
         animation: mochi-drift 10s ease infinite;
       }
       .mochi-card {
-        background: #000000;
+        background: #2d3a47;
         border-radius: 1.25rem;
         padding: 1.6rem;
         height: 100%;
