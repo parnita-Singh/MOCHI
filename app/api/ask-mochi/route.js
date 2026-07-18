@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { askClaude } from "../lib/bedrock"; 
+import { askClaude } from "../../../lib/bedrock";
 
 export async function POST(request) {
   try {
