@@ -1,10 +1,10 @@
-import Navbar from "../components/NavBar";
-import Hero from "../components/sections/Hero";
+import NavBar from "./sections/NavBar";
+import Hero from "./sections/Hero";
 
 export default function Home() {
   return (
     <main>
-       <Navbar minimal />
+      <NavBar />
       <Hero />
     </main>
   );
