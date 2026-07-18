@@ -1,23 +1,38 @@
 import { NextResponse } from "next/server";
-import { askClaude } from "@/lib/bedrock";
-// import { getUserExpenses } from "@/lib/dynamodb"; // reuse your existing helper
+import { askClaude } from "../lib/bedrock"; 
 
 export async function POST(request) {
-    try {
-    const { question, userId } = await request.json();
+  try {
+    const { message, history } = await request.json();
 
-    // const financeData = await getUserExpenses(userId); // pull real data
-    const financeData = { totalSpent: 8400, budgetLeft: 16600 }; // placeholder until wired
-
-    const prompt = `You are Mochi, a friendly budgeting assistant.
-User's finance data: ${JSON.stringify(financeData)}
-Question: ${question}
-Answer briefly and warmly, referencing real numbers where relevant.`;
-
-    const answer = await askClaude(prompt);
-    return NextResponse.json({ answer });
-    } catch (err) {
-    console.error("Bedrock error:", err);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+    if (!message || typeof message !== "string") {
+      return NextResponse.json(
+        { error: "Missing 'message' in request body" },
+        { status: 400 }
+      );
     }
+
+    // Fold prior turns into a single prompt Claude can use as context.
+    // Swap this for a proper multi-turn `messages` array in bedrock.js
+    // once you want Mochi to remember more than the current question.
+    const historyText = Array.isArray(history)
+      ? history
+          .map((m) => `${m.role === "user" ? "User" : "Mochi"}: ${m.text}`)
+          .join("\n")
+      : "";
+
+    const prompt = historyText
+      ? `${historyText}\nUser: ${message}\nMochi:`
+      : message;
+
+    const reply = await askClaude(prompt);
+
+    return NextResponse.json({ reply });
+  } catch (err) {
+    console.error("ask-mochi route error:", err);
+    return NextResponse.json(
+      { error: "Something went wrong talking to Mochi. Please try again." },
+      { status: 500 }
+    );
+  }
 }
