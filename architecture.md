@@ -55,11 +55,10 @@ flowchart TD
 | Sign up / Sign in (Cognito) | ✅ Live |
 | Dashboard + sidebar | ✅ Live |
 | Finance card | ✅ Live |
-| Summaries card | 🔲 In progress |
-| Savings goals | 🔲 In progress |
-| Mochi AI (Bedrock) | 🔲 Planned — not yet wired |
-| Settings | 🔲 In progress |
-| FAQs / Help center | 🔲 In progress |
+| Summaries card | ✅ In progress |
+| Savings goals | ✅In progress |
+| Mochi AI (Bedrock) | ✅  |
+| Settings | ✅ In progress |
 
 ## Next Steps
 
