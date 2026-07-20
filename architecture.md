@@ -17,7 +17,7 @@ flowchart TD
     Lambda[AWS Lambda<br/>SSR / Auth / API Routes]
     Cognito[Amazon Cognito<br/>Sign Up / Sign In]
     DynamoDB[(Amazon DynamoDB<br/>User & Finance Data)]
-    Bedrock[Amazon Bedrock<br/>Mochi AI - Planned]
+    Bedrock[Amazon Bedrock<br/>Mochi AI ]
 
     User -->|HTTPS Request| CF
     CF --> Amplify
