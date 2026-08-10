@@ -25,7 +25,7 @@ Built as part of the **AWS Student Builder Cohort 2026** (AI + Cloud Track, Team
 | Frontend | Next.js, Tailwind CSS |
 | Database | AWS DynamoDB |
 | Deployment | AWS Amplify |
-| AI (planned) | AWS Bedrock |
+| AI | AWS Bedrock |
 
 ---
 
