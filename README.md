@@ -7,7 +7,7 @@
 An AI powered budget tracker built for Gen Z and Alpha. Mochi helps young, first time earners understand and manage their money in a way that actually feels approachable, not clinical.
 
 **Live app:** https://main.d3bxx53jps67fn.amplifyapp.com/
-**Status:** Top 5 of 216 teams, AWS Student Builder Cohort
+**Status:** Top 10 of 95 teams, AWS Student Summer Builder Cohort
 
 ## What Mochi Does
 
