@@ -6,7 +6,11 @@
 
 An AI powered budget tracker built for Gen Z and Alpha. Mochi helps young, first time earners understand and manage their money in a way that actually feels approachable, not clinical.
 
-**Live app:** https://main.d3bxx53jps67fn.amplifyapp.com/
+## Live Project
+
+🔗 [MOCHI](https://main.d3bxx53jps67fn.amplifyapp.com/)
+
+
 **Status:** Top 10 of 95 teams, AWS Student Summer Builder Cohort
 
 ## What Mochi Does
@@ -49,31 +53,6 @@ app/
 
 More routes and components will be added as the financial learning module is built out.
 
-## Getting Started
-
-Clone the repository and install dependencies:
-
-\```bash
-git clone https://github.com/parnita-Singh/MOCHI.git
-cd MOCHI
-npm install
-\```
-
-Set up your environment variables in a `.env.local` file. You will need credentials for:
-
-* AWS DynamoDB
-* AWS Bedrock
-* AWS Amplify
-* NextAuth (client ID, secret, and callback URL for your provider)
-
-Then run the development server:
-
-\```bash
-npm run dev
-\```
-
-The app will be available at `http://localhost:3000`.
-
 ## Roadmap
 
 * Dedicated financial budgeting learning module, in active development
@@ -81,10 +60,6 @@ The app will be available at `http://localhost:3000`.
 * Goal based savings recommendations
 * A dedicated mobile app
 * Exploring real bank data integrations
-
-## Team
-
-Built by Parnita Singh as part of the AWS Student Builder Cohort.
 
 ## License
 
@@ -114,13 +89,6 @@ Create a `.env.local` file in the root folder:
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000)
-
----
-
-## Live Demo
-
-🔗 [MOCHI](https://main.d3bxx53jps67fn.amplifyapp.com/)
-
 
 ## Team
 
